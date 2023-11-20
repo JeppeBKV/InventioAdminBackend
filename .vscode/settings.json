@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "bin\\Release\\net7.0\\publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/9ce68ba1-4733-4686-86bd-dcfa59b967b5/resourceGroups/RG-Svendeprove-westeu/providers/Microsoft.Web/sites/svendeproveCoreWebApp"
+}
