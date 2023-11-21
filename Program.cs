@@ -35,6 +35,7 @@ public class Settings
     public static string CosmosDbUrl = "";
     public static string CosmosDbKey = "";
     public static string CosmosDbName = "";
+    public static string TokenSecret = "";
 }
 static public class InventioAdminCosmosDB
 {

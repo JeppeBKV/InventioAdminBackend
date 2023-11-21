@@ -8,13 +8,20 @@ namespace InventioAdminBackend.Helpers
 {
     public class InventioUserHelpers
     {
-        public static async Task<(bool, string)> CreateUser(CreateModel _ctx)
+        public static async Task<(bool, string)> CreateUser(UsernamePasswordModel _ctx)
         {
-            InventioLoginModel IITLoginModel = new("4", _ctx.UserName, _ctx.Password);
+            string newGuid = Guid.NewGuid().ToString();
+            InventioLoginModel IITLoginModel = new(newGuid, _ctx.UserName, _ctx.Password);
             string json = JsonSerializer.Serialize(IITLoginModel);
-            var response = await CosmosHelpers.InsertIntoCosmos("InventioLogin", "userName", json);
+            var response = await CosmosHelpers.InsertIntoCosmos("InventioLoginV2", "UserName", json);
 
             return response;
+        }
+
+        public static async Task<bool> ValidateUser(string dbpassword, string passwordSubmitted)
+        {
+            if(dbpassword == passwordSubmitted) return true;
+            return false;
         }
     }
 }
