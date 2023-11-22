@@ -10,6 +10,7 @@ namespace InventioAdminBackend.Helpers
 {
     public class CosmosHelpers
     {
+        // This is for insert/upserting in cosmos. This is made dynamic, so it can put items into any container in the inventio database
         public static async Task<(bool, string)> InsertIntoCosmos(string containerName, string partitionkey, string json)
         {
             Database database = await InventioAdminCosmosDB.client.CreateDatabaseIfNotExistsAsync(Settings.CosmosDbName);
@@ -30,7 +31,7 @@ namespace InventioAdminBackend.Helpers
             content = new StreamReader(response.Content, Encoding.UTF8).ReadToEnd();
             return (statusCode, content);
         }
-
+        // this is for validating the password when trying to login.
         public static async Task<string> RetrieveUserItemAsync(string username)
         {
             try
@@ -59,33 +60,34 @@ namespace InventioAdminBackend.Helpers
 
         }
 
-        public static async Task<string> RetrieveItemsAsync(string containerName, string query)
+        public static async Task<(List<CustomerInfo>, string)> RetrieveCustomerItemsAsync()
         {
             Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
-            Container container = database.GetContainer(containerName);
-
+            Container container = database.GetContainer("InventioKunder");
+            List<CustomerInfo> customers = new();
             try
-            {
-                QueryDefinition queryDefinition = new QueryDefinition(query).WithParameter("@category", "yourcategoryvalue");
-                FeedIterator<string> queryResultSEtIterator = container.GetItemQueryIterator<string>(queryDefinition);
+            {   // Make a query static. hence its needs a model. 
+                // QueryDefinition queryDefinition = new QueryDefinition("SELECT * FROM c").WithParameter("@category", "yourcategoryvalue");
+                QueryDefinition queryDefinition = new ("SELECT * FROM c");
+                FeedIterator<CustomerInfo> queryResultSEtIterator = container.GetItemQueryIterator<CustomerInfo>(queryDefinition);
 
                 while(queryResultSEtIterator.HasMoreResults)
                 {
                     // reality should return this. 
-                    FeedResponse<string> currentResultSet = await queryResultSEtIterator.ReadNextAsync();
-                    foreach(string item in currentResultSet)
+                    FeedResponse<CustomerInfo> currentResultSet = await queryResultSEtIterator.ReadNextAsync();
+                    foreach(CustomerInfo item in currentResultSet)
                     {
-                        // do something. 
-                        Console.Write("retrieved item: {item}");
+                        customers.Add(item);
                     }
+                    
                 }
+
             }
             catch(Exception ex)
             {
-                return ex.Message;
+                return (customers, ex.Message);
             }
-            
-            return "Ok";
+            return (customers, "No Errors");
         }
     }
 }

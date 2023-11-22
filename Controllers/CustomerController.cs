@@ -1,16 +1,19 @@
+using System.Net;
+using InventioAdminBackend.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventioAdminBackend.Controllers
 {
     [ApiController]
-    [Route("customer")]
+    [Route("api/customer")]
     public class CustomerController : ControllerBase
     {
         [HttpGet("list")]
-        public async Task<IActionResult> CustomerList([FromQuery] string indentifier)
+        public async Task<IActionResult> CustomerList()
         {
-            
-            return Ok();
+            var response = await CosmosHelpers.RetrieveCustomerItemsAsync();
+            if(response.Item2 == "No Errors") return Ok(response.Item1);
+            return BadRequest(response.Item2);
         }
     }
 }
