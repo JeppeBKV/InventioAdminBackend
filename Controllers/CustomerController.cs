@@ -22,7 +22,24 @@ namespace InventioAdminBackend.Controllers
         {
             var response = await CosmosHelpers.EditCustomer(CustomerData);
             if(response == "Item Updated successfully") return Ok(response);
-            return BadRequest(response);
+            return BadRequest(response); 
+        }
+        
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteCustomer([FromBody] string customerId)
+        {
+            var response = await CosmosHelpers.DeleteCustomerAsync(customerId);
+            if(response == "Deleted successfully") return Ok($"Customer {customerId} deleted");
+            return BadRequest("Error");
+        }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateCustomer([FromBody] CustomerInfo customer)
+        {
+            var response = await CustomerHelpers.CreateUser(customer);
+            if(!response.Item1) return BadRequest(response.Item2);
+            return Ok(response.Item2);
+
         }
     }
 }

@@ -32,7 +32,7 @@ namespace InventioAdminBackend.Helpers
             return (statusCode, content);
         }
         // this is for validating the password when trying to login.
-        public static async Task<string> RetrieveUserItemAsync(string username)
+        public static async Task<(string, string?)> RetrieveUserItemAsync(string username)
         {
             try
             {
@@ -48,14 +48,14 @@ namespace InventioAdminBackend.Helpers
                     FeedResponse<InventioLoginModel> feedResponse = await queryResult.ReadNextAsync();
                     foreach(var user in feedResponse)
                     {
-                        return user.Password;    
+                        return (user.Password, user.id);    
                     }
                 }
-                return "no users found";
+                return ("no users found", null);
             }
             catch(Exception ex)
             {
-                return ex.Message;
+                return (ex.Message, null);
             }
 
         }
@@ -138,6 +138,26 @@ namespace InventioAdminBackend.Helpers
             {
                 return ex.Message;
             }
+        }
+
+        public static async Task<string> DeleteCustomerAsync(string customerId)
+        {
+            Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
+            Container container = database.GetContainer("InventioKunderV2");
+            try
+            {
+                ItemResponse<CustomerInfo> response = await container.DeleteItemAsync<CustomerInfo>(customerId, new PartitionKey(customerId));
+                return "Deleted successfully";
+            }
+            catch(CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return "Customer not found";
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
+
         }
         
     }
