@@ -1,3 +1,4 @@
+using InventioAdminBackend.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using System.Text;
@@ -34,5 +35,11 @@ namespace InventioAdminBackend.Controllers
                 return Ok(content);
             }
         }
+        // [HttpGet]
+        // public async Task<IActionResult> testupdate()
+        // {
+        //     var response = await CosmosHelpers.editLogintest();
+        //     return Ok(response);
+        // }
     }
 }

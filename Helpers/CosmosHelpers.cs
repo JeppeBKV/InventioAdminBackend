@@ -63,7 +63,7 @@ namespace InventioAdminBackend.Helpers
         public static async Task<(List<CustomerInfo>, string)> RetrieveCustomerItemsAsync()
         {
             Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
-            Container container = database.GetContainer("InventioKunder");
+            Container container = database.GetContainer("InventioKunderV2");
             List<CustomerInfo> customers = new();
             try
             {   // Make a query static. hence its needs a model. 
@@ -114,5 +114,31 @@ namespace InventioAdminBackend.Helpers
             }
             return (SmartApps, "No Errors");
         }
+
+        public static async Task<string> EditCustomer(CustomerInfo newCustomerInfo)
+        {
+            Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
+            Container container = database.GetContainer("InventioKunderV2");
+            try
+            {
+                ItemResponse<CustomerInfo> response = await container.ReadItemAsync<CustomerInfo>(newCustomerInfo.id, new PartitionKey(newCustomerInfo.id));
+                CustomerInfo customer = response.Resource;
+                
+                // Make some logic to what needs to change here... e.g. customer.name = "new value";
+                customer = newCustomerInfo;
+
+                ItemResponse<CustomerInfo> updateResponse = await container.ReplaceItemAsync(customer, customer.id, new PartitionKey(newCustomerInfo.id));
+                return "Item Updated successfully";
+            }
+            catch(CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return "Item not found";
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+        
     }
 }
