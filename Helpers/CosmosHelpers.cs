@@ -89,5 +89,30 @@ namespace InventioAdminBackend.Helpers
             }
             return (customers, "No Errors");
         }
+
+        public static async Task<(List<SMARTapps>, string)> RetrieveSmartAppsAsync()
+        {
+            Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
+            Container container = database.GetContainer("InventioSMARTApps");
+            List<SMARTapps> SmartApps = new();
+            try
+            {
+                QueryDefinition queryDefinition = new ("SELECT * FROM c");
+                FeedIterator<SMARTapps> queryResultSetIterator = container.GetItemQueryIterator<SMARTapps>(queryDefinition);
+                while(queryResultSetIterator.HasMoreResults)
+                {
+                    FeedResponse<SMARTapps> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                    foreach(SMARTapps item in currentResultSet)
+                    {
+                        SmartApps.Add(item);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                return (SmartApps, ex.Message);
+            }
+            return (SmartApps, "No Errors");
+        }
     }
 }
