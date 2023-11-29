@@ -1,7 +1,11 @@
 using System.Net;
+using System.Text.Json;
 using InventioAdminBackend.Helpers;
 using InventioAdminBackend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
+using Microsoft.IdentityModel.Abstractions;
+using Newtonsoft.Json;
 
 namespace InventioAdminBackend.Controllers
 {
@@ -18,26 +22,35 @@ namespace InventioAdminBackend.Controllers
         }
 
         [HttpPost("edit")]
-        public async Task<IActionResult> UpdateCustomer([FromBody]CustomerInfo CustomerData)
+        public async Task<IActionResult> UpdateCustomer([FromBody]CustomerInfo CustomerData, string userId)
         {
             var response = await CosmosHelpers.EditCustomer(CustomerData);
-            if(response == "Item Updated successfully") return Ok(response);
-            return BadRequest(response); 
+            if(response != "Item Updated successfully") return BadRequest(response); 
+            
+            await LogHelpers.LogEditCustomer(userId, CustomerData);
+
+            return Ok(response);
         }
         
         [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteCustomer([FromBody] string Id)
+        public async Task<IActionResult> DeleteCustomer([FromBody] string Id, string userId)
         {
             var response = await CosmosHelpers.DeleteCustomerAsync(Id);
-            if(response == "Deleted successfully") return Ok($"Customer {Id} deleted");
-            return BadRequest("Error");
+            if(response != "Deleted successfully") return BadRequest("Error");
+            
+            await LogHelpers.LogDeleteCustomer(userId, Id);
+
+            return Ok($"Customer {Id} deleted");
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateCustomer([FromBody] CustomerInfo customer)
+        public async Task<IActionResult> CreateCustomer([FromBody] CustomerInfo customer, string userId)
         {
             var response = await CustomerHelpers.CreateUser(customer);
             if(!response.Item1) return BadRequest(response.Item2);
+            
+            await LogHelpers.LogCreateCustomer(userId, response.Item2);
+            
             return Ok(response.Item2);
 
         }

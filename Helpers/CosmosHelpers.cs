@@ -1,9 +1,12 @@
 using InventioAdminBackend.Models;
 using Microsoft.Azure.Cosmos;
+// using Microsoft.Azure.Cosmos.Serialization.HybridRow.Schemas;
 using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace InventioAdminBackend.Helpers
@@ -29,6 +32,7 @@ namespace InventioAdminBackend.Helpers
                 content = response.ErrorMessage; 
             }
             content = new StreamReader(response.Content, Encoding.UTF8).ReadToEnd();
+            
             return (statusCode, content);
         }
         // this is for validating the password when trying to login.
@@ -123,9 +127,17 @@ namespace InventioAdminBackend.Helpers
             {
                 ItemResponse<CustomerInfo> response = await container.ReadItemAsync<CustomerInfo>(newCustomerInfo.id, new PartitionKey(newCustomerInfo.id));
                 CustomerInfo customer = response.Resource;
-                
-                // Make some logic to what needs to change here... e.g. customer.name = "new value";
-                customer = newCustomerInfo;
+            
+                Type customerType = typeof(CustomerInfo);
+                foreach(PropertyInfo item in customerType.GetProperties())
+                {
+                    object newValue = item.GetValue(newCustomerInfo);
+
+                    if(newValue != null)
+                    {
+                        item.SetValue(customer, newValue);
+                    }
+                }
 
                 ItemResponse<CustomerInfo> updateResponse = await container.ReplaceItemAsync(customer, customer.id, new PartitionKey(newCustomerInfo.id));
                 return "Item Updated successfully";
@@ -146,7 +158,7 @@ namespace InventioAdminBackend.Helpers
             Container container = database.GetContainer("InventioKunderV2");
             try
             {
-                ItemResponse<CustomerInfo> response = await container.DeleteItemAsync<CustomerInfo>(customerId, new PartitionKey(customerId));
+                ItemResponse<CustomerInfo> response = await container.DeleteItemAsync<CustomerInfo>(customerId, new Microsoft.Azure.Cosmos.PartitionKey(customerId));
                 return "Deleted successfully";
             }
             catch(CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
