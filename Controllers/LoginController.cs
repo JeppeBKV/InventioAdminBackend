@@ -22,7 +22,11 @@ namespace InventioAdminBackend.Controllers
         {
             var response = await CosmosHelpers.RetrieveUserItemAsync(_ctx.UserName);
             var response2 = await InventioUserHelpers.ValidateUser(response.Item1, _ctx.Password);
-            if(response2) return Ok(response.Item2);
+            
+            if(response2)  
+            {
+                return Ok(response.Item2);
+            }
             return BadRequest("Wrong password");
         }
     }

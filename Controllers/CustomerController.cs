@@ -26,10 +26,10 @@ namespace InventioAdminBackend.Controllers
         }
         
         [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteCustomer([FromBody] string customerId)
+        public async Task<IActionResult> DeleteCustomer([FromBody] string Id)
         {
-            var response = await CosmosHelpers.DeleteCustomerAsync(customerId);
-            if(response == "Deleted successfully") return Ok($"Customer {customerId} deleted");
+            var response = await CosmosHelpers.DeleteCustomerAsync(Id);
+            if(response == "Deleted successfully") return Ok($"Customer {Id} deleted");
             return BadRequest("Error");
         }
 
