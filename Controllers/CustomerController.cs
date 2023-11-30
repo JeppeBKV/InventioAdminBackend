@@ -22,7 +22,7 @@ namespace InventioAdminBackend.Controllers
         }
 
         [HttpPost("edit")]
-        public async Task<IActionResult> UpdateCustomer([FromBody]CustomerInfo CustomerData, string userId)
+        public async Task<IActionResult> UpdateCustomer([FromBody]CustomerInfo CustomerData, [FromHeader]string userId)
         {
             var response = await CosmosHelpers.EditCustomer(CustomerData);
             if(response != "Item Updated successfully") return BadRequest(response); 
@@ -32,8 +32,8 @@ namespace InventioAdminBackend.Controllers
             return Ok(response);
         }
         
-        [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteCustomer([FromBody] string Id, string userId)
+        [HttpDelete("delete")] 
+        public async Task<IActionResult> DeleteCustomer([FromBody] string Id, [FromHeader]string userId)
         {
             var response = await CosmosHelpers.DeleteCustomerAsync(Id);
             if(response != "Deleted successfully") return BadRequest("Error");
@@ -44,7 +44,7 @@ namespace InventioAdminBackend.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateCustomer([FromBody] CustomerInfo customer, string userId)
+        public async Task<IActionResult> CreateCustomer([FromBody] CustomerInfo customer, [FromHeader]string userId)
         {
             var response = await CustomerHelpers.CreateUser(customer);
             if(!response.Item1) return BadRequest(response.Item2);

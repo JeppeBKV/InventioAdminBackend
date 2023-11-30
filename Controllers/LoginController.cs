@@ -17,15 +17,16 @@ namespace InventioAdminBackend.Controllers
             if(!response.Item1) return BadRequest(response.Item2);
             return Ok(response.Item2);
         }
+
         [HttpPost("validate")]
         public async Task<IActionResult> Validate([FromBody] UsernamePasswordModel _ctx)
         {
             var response = await CosmosHelpers.RetrieveUserItemAsync(_ctx.UserName);
             var response2 = await InventioUserHelpers.ValidateUser(response.Item1, _ctx.Password);
-            
             if(response2)  
             {
-                return Ok(response.Item2);
+                LoggedInId userId = new(){ Id = response.Item2};
+                return Ok(userId);
             }
             return BadRequest("Wrong password");
         }

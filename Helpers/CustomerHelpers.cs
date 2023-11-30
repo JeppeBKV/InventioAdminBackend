@@ -17,6 +17,7 @@ namespace InventioAdminBackend.Helpers
             // CustomerInfo CustomerInfo = new(newGuid, _ctx.UserName, _ctx.Password);
             CustomerInfo customerInfo = _ctx;
             customerInfo.id = newGuid;
+            customerInfo.Created = DateTime.UtcNow.ToString();
             string json = JsonSerializer.Serialize(customerInfo);
             var response = await CosmosHelpers.InsertIntoCosmos("InventioKunderV2", "id", json);
 
