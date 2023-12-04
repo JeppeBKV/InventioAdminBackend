@@ -9,7 +9,8 @@ namespace InventioAdminBackend.Models
         public string? Licenstype { get; set; }
         public string? Status { get; set; }
         public string? Country { get; set; }
-        public string? Users { get; set; }
-        public string? Created { get; set; }
+        public int? Users { get; set; }
+        public List<string>? SmartApps { get; set; }
+        public DateTime? Created { get; set; }
     }
 }

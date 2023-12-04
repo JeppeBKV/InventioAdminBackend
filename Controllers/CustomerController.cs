@@ -3,9 +3,6 @@ using System.Text.Json;
 using InventioAdminBackend.Helpers;
 using InventioAdminBackend.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using Microsoft.IdentityModel.Abstractions;
-using Newtonsoft.Json;
 
 namespace InventioAdminBackend.Controllers
 {
@@ -51,8 +48,7 @@ namespace InventioAdminBackend.Controllers
             
             await LogHelpers.LogCreateCustomer(userId, response.Item2);
             
-            return Ok(response.Item2);
-
+            return Ok(response.Item2); 
         }
     }
 }
