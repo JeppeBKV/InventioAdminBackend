@@ -169,8 +169,66 @@ namespace InventioAdminBackend.Helpers
             {
                 return ex.Message;
             }
-
         }
-        
+
+        public static async Task<List<CustomerSMARTapps>> RetrieveCustomerSmartApps()
+        {
+            Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
+            Container container = database.GetContainer("InventioKunderV2");
+            List<CustomerSMARTapps> CustomersSmartApps = new();
+            try
+            {   
+                QueryDefinition queryDefinition = new ("SELECT c.id, c.SmartApps FROM c WHERE ARRAY_LENGTH(c.SmartApps) > 0");
+                FeedIterator<CustomerSMARTapps> queryResultSEtIterator = container.GetItemQueryIterator<CustomerSMARTapps>(queryDefinition);
+                while(queryResultSEtIterator.HasMoreResults)
+                {
+                    // reality should return this. 
+                    FeedResponse<CustomerSMARTapps> currentResultSet = await queryResultSEtIterator.ReadNextAsync();
+                    foreach(CustomerSMARTapps item in currentResultSet)
+                    {
+                        CustomersSmartApps.Add(item);
+                    }   
+                }
+            }
+            catch(Exception ex)
+            {
+                return CustomersSmartApps;
+            }
+            return CustomersSmartApps;
+        }
+
+        public static async Task<string> EditSmartApps(Dictionary<string, int> smartappsCount)
+        {
+            Database database = InventioAdminCosmosDB.client.GetDatabase(Settings.CosmosDbName);
+            Container container = database.GetContainer("InventioSMARTApps");
+            try
+            {
+                QueryDefinition queryDefinition = new($"SELECT * FROM c");
+                var queryResult = container.GetItemQueryIterator<SMARTapps>(queryDefinition);
+
+                while(queryResult.HasMoreResults)
+                {
+                    FeedResponse<SMARTapps> currentResult = await queryResult.ReadNextAsync();
+                    foreach (var item in currentResult)
+                    {
+                        if(smartappsCount.ContainsKey(item.Name))
+                        {
+                            item.Installed = smartappsCount[item.Name];
+                            var response = await container.ReplaceItemAsync(item, item.id);
+                        } 
+                    }
+                }
+                
+                return "Item Updated successfully";
+            }
+            catch(CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return "Item not found";
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
+        }
     }
 }
